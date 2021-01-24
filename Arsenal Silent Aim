@@ -1,0 +1,75 @@
+--[[
+
+		██╗░░░██╗██████╗░██╗░█████╗░░█████╗░░██████╗████████╗
+		██║░░░██║██╔══██╗██║██╔══██╗██╔══██╗██╔════╝╚══██╔══╝
+		██║░░░██║██████╦╝██║██║░░╚═╝███████║╚█████╗░░░░██║░░░
+		██║░░░██║██╔══██╗██║██║░░██╗██╔══██║░╚═══██╗░░░██║░░░
+		╚██████╔╝██████╦╝██║╚█████╔╝██║░░██║██████╔╝░░░██║░░░
+		░╚═════╝░╚═════╝░╚═╝░╚════╝░╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
+
+]]
+
+local Camera = workspace.CurrentCamera
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+_G.SilentAimEnabled = true
+
+local function GetClosestPlayer()
+	local MaximumDistance = math.huge
+	local Target
+
+	for _, v in pairs(game.Players:GetPlayers()) do
+		if v.Name ~= LocalPlayer.Name then
+			if v.TeamColor ~= LocalPlayer.TeamColor then
+				if workspace:FindFirstChild(v.Name) ~= nil then
+					if workspace[v.Name]:FindFirstChild("HumanoidRootPart") ~= nil then
+						if workspace[v.Name]:FindFirstChild("Humanoid") ~= nil and workspace[v.Name]:FindFirstChild("Humanoid").Health ~= 0 then
+							local ScreenPoint = Camera:WorldToScreenPoint(workspace[v.Name]:WaitForChild("HumanoidRootPart", math.huge).Position)
+							local VectorDistance = (Vector2.new(UserInputService:GetMouseLocation().X, UserInputService:GetMouseLocation().Y) - Vector2.new(ScreenPoint.X, ScreenPoint.Y)).Magnitude
+							
+							if VectorDistance < MaximumDistance then
+								Target = v
+								MaximumDistance = VectorDistance
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return Target
+end
+
+local GameMetaTable = getrawmetatable(game)
+local OldNameCall = GameMetaTable.__namecall
+
+setreadonly(GameMetaTable, false)
+
+GameMetaTable.__namecall = newcclosure(function(Self, ...)
+	local NameCallMethod = getnamecallmethod()
+
+	local Arguments = {...}
+
+	if tostring(Self) == "HitPart" and tostring(NameCallMethod) == "FireServer" then
+		if _G.SilentAimEnabled == true then
+			Arguments[1] = GetClosestPlayer().Character.Head
+			Arguments[2] = GetClosestPlayer().Character.Head.Position
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	elseif tostring(Self) == "CreateProjectile" and tostring(NameCallMethod) == "FireServer" then	
+		if _G.SilentAimEnabled == true then
+			Arguments[18] = GetClosestPlayer().Character.Head
+			Arguments[19] = GetClosestPlayer().Character.Head.Position
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	end
+
+	return OldNameCall(Self, ...)
+end)
+
+setreadonly(GameMetaTable, true)
