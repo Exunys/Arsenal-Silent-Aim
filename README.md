@@ -13,5 +13,5 @@ loadstring(game:HttpGet("https://pastebin.com/raw/NWMRbDL3"))()
 
 ## Contact information
 
-- Discord : [Aleksandar#2880](https://discord.com/users/611111398818316309)
+- Discord : [Aleksandar](https://discord.com/users/611111398818316309)
 - ROBLOX : [Ubicast](https://www.roblox.com/users/330279990/profile)
