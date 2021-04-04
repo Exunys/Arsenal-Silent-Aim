@@ -1,26 +1,37 @@
---[[
+--// Services
 
-		██╗░░░██╗██████╗░██╗░█████╗░░█████╗░░██████╗████████╗
-		██║░░░██║██╔══██╗██║██╔══██╗██╔══██╗██╔════╝╚══██╔══╝
-		██║░░░██║██████╦╝██║██║░░╚═╝███████║╚█████╗░░░░██║░░░
-		██║░░░██║██╔══██╗██║██║░░██╗██╔══██║░╚═══██╗░░░██║░░░
-		╚██████╔╝██████╦╝██║╚█████╔╝██║░░██║██████╔╝░░░██║░░░
-		░╚═════╝░╚═════╝░╚═╝░╚════╝░╚═╝░░╚═╝╚═════╝░░░░╚═╝░░░
-
-]]
-
-local Camera = workspace.CurrentCamera
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+--// Shortcuts
+
+local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
+--// Variables
+
+local GameMetaTable = getrawmetatable(game)
+local OldNameCall = GameMetaTable.__namecall
+
+--// Settings
+
 _G.SilentAimEnabled = true
+
+--// Functions
 
 local function GetClosestPlayer()
 	local MaximumDistance = math.huge
 	local Target
 
-	for _, v in pairs(game.Players:GetPlayers()) do
+	local Thread = coroutine.wrap(function()
+		wait(20)
+		MaximumDistance = math.huge
+	end)
+
+	Thread()
+
+	for _, v in next, Players:GetPlayers() do
 		if v.Name ~= LocalPlayer.Name then
 			if v.TeamColor ~= LocalPlayer.TeamColor then
 				if workspace:FindFirstChild(v.Name) ~= nil then
@@ -43,27 +54,120 @@ local function GetClosestPlayer()
 	return Target
 end
 
-local GameMetaTable = getrawmetatable(game)
-local OldNameCall = GameMetaTable.__namecall
+--// Silent Aim
 
 setreadonly(GameMetaTable, false)
 
 GameMetaTable.__namecall = newcclosure(function(Self, ...)
 	local NameCallMethod = getnamecallmethod()
-
 	local Arguments = {...}
 
-	if tostring(Self) == "HitPart" and tostring(NameCallMethod) == "FireServer" then
+	if not checkcaller() and tostring(Self) == "HitPart" and tostring(NameCallMethod) == "FireServer" then
 		if _G.SilentAimEnabled == true then
-			Arguments[1] = GetClosestPlayer().Character.Head
-			Arguments[2] = GetClosestPlayer().Character.Head.Position
+			Arguments[1] = GetClosestPlayer().Character.Hitbox
+			Arguments[2] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[8] = true
 		end
 
 		return Self.FireServer(Self, unpack(Arguments))
-	elseif tostring(Self) == "CreateProjectile" and tostring(NameCallMethod) == "FireServer" then	
+	elseif not checkcaller() and tostring(Self) == "Trail" and tostring(NameCallMethod) == "FireServer" then
 		if _G.SilentAimEnabled == true then
-			Arguments[18] = GetClosestPlayer().Character.Head
-			Arguments[19] = GetClosestPlayer().Character.Head.Position
+			if Arguments[1][5] == "Lightning Cannon" then
+				Arguments[1][6] = GetClosestPlayer().Character.Hitbox
+				Arguments[1][2] = GetClosestPlayer().Character.Hitbox.Position
+			end
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	elseif not checkcaller() and tostring(Self) == "CreateProjectile" and tostring(NameCallMethod) == "FireServer" then	
+		if _G.SilentAimEnabled == true then
+			Arguments[18] = GetClosestPlayer().Character.Hitbox
+			Arguments[19] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[4] = GetClosestPlayer().Character.Hitbox.CFrame
+
+			Arguments[10] = GetClosestPlayer().Character.Hitbox.Position -- << >> << >> << >> << >>
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	elseif not checkcaller() and tostring(Self) == "Flames" and tostring(NameCallMethod) == "FireServer" then -- DOESNT WORK
+		if _G.SilentAimEnabled == true then
+			Arguments[1] = GetClosestPlayer().Character.Hitbox.CFrame
+			Arguments[2] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[5] = GetClosestPlayer().Character.Hitbox.Position
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	elseif not checkcaller() and tostring(Self) == "Fire" and tostring(NameCallMethod) == "FireServer" then
+		if _G.SilentAimEnabled == true then
+			Arguments[1] = GetClosestPlayer().Character.Hitbox.Position
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	elseif not checkcaller() and tostring(Self) == "ReplicateProjectile" and tostring(NameCallMethod) == "FireServer" then
+		if _G.SilentAimEnabled == true then
+			Arguments[1][3] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[1][4] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[1][10] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[1][13][16] = GetClosestPlayer().Character.Head
+			Arguments[1][13][24] = GetClosestPlayer().Character.Head
+			Arguments[1][13][30] = GetClosestPlayer().Character.Head
+			Arguments[1][13][37] = GetClosestPlayer().Character.Head
+			Arguments[1][13][46] = GetClosestPlayer().Character.Head
+			Arguments[1][13][56] = GetClosestPlayer().Character.Head
+		end
+
+		return Self.FireServer(Self, unpack(Arguments))
+	elseif not checkcaller() and tostring(Self) == "RemoteEvent" and tostring(NameCallMethod) == "FireServer" then
+		if _G.SilentAimEnabled == true then
+			if Arguments[1][1] == "createparticle" and Arguments[1][2] == "muzzle" then
+				if Arguments[3] == LocalPlayer.Character.Gun then
+					if ReplicatedStorage.Weapons(LocalPlayer.Character.Gun.Boop.Value).Melee then
+						local KnifeArguments1 = {
+							[1] = "createparticle",
+							[2] = "bullethole",
+							[3] = GetClosestPlayer().Character.Hitbox,
+							[4] = GetClosestPlayer().Character.Hitbox.Position,
+							[5] = Vector3.new(0, 0, 0),
+							[6] = ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.Gun.Boop.Value),
+							[7] = false,
+							[8] = GetClosestPlayer().Character.Hitbox.Position,
+							[9] = true,
+							[12] = LocalPlayer,
+							[13] = 1
+						}
+						
+						local KnifeArguments = {
+							GetClosestPlayer().Character.Hitbox,
+							GetClosestPlayer().Character.Hitbox.Position,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).Name,
+							1,
+							5,
+							false,
+							false,
+							false,
+							1,
+							false,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).FireRate.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).ReloadTime.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).Ammo.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).StoredAmmo.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).Bullets.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).EquipTime.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).RecoilControl.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).Auto.Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value)['Speed%'].Value,
+							ReplicatedStorage:WaitForChild("wkspc").DistributedTime.Value,
+							215,
+							1,
+							false,
+							true
+						}
+
+						ReplicatedStorage.Events.RemoteEvent:FireServer(KnifeArguments1)
+						ReplicatedStorage.Events.HitPart:FireServer(unpack(KnifeArguments))
+					end
+				end
+			end
 		end
 
 		return Self.FireServer(Self, unpack(Arguments))
