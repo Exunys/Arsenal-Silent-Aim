@@ -2,7 +2,9 @@
 
 ### About
 
-Nothing much about this script. Whenever you shoot, the bullet hits the player that is closest to your mouse in the head.
+Nothing much about this script. Whenever you shoot, the bullet hits the player that is closest to your mouse.
+
+~ Fixed 14/7/2021 patch, updated the script, the silent aim now works again.
 
 ## Script
 
