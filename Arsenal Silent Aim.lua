@@ -11,12 +11,11 @@ local LocalPlayer = Players.LocalPlayer
 
 --// Variables
 
-local GameMetaTable = getrawmetatable(game)
-local OldNameCall = GameMetaTable.__namecall
+local OldNameCall = nil
 
 --// Settings
 
-_G.SilentAimEnabled = true
+getgenv().SilentAimEnabled = true
 
 --// Functions
 
@@ -56,23 +55,19 @@ end
 
 --// Silent Aim
 
-setreadonly(GameMetaTable, false)
-
-GameMetaTable.__namecall = newcclosure(function(Self, ...)
+OldNameCall = hookmetamethod(game, "__namecall", function(Self, ...)
 	local NameCallMethod = getnamecallmethod()
 	local Arguments = {...}
 
 	if not checkcaller() and tostring(Self) == "HitPart" and tostring(NameCallMethod) == "FireServer" then
-		if _G.SilentAimEnabled == true then
+		if getgenv().SilentAimEnabled == true then
 			Arguments[1] = GetClosestPlayer().Character.Hitbox
-			Arguments[2] = GetClosestPlayer().Character.Hitbox.Position
-			Arguments[8] = true
 		end
 
 		return Self.FireServer(Self, unpack(Arguments))
 	elseif not checkcaller() and tostring(Self) == "Trail" and tostring(NameCallMethod) == "FireServer" then
-		if _G.SilentAimEnabled == true then
-			if Arguments[1][5] == "Lightning Cannon" then
+		if getgenv().SilentAimEnabled == true then
+			if type(Arguments[1][5]) == "string" then
 				Arguments[1][6] = GetClosestPlayer().Character.Hitbox
 				Arguments[1][2] = GetClosestPlayer().Character.Hitbox.Position
 			end
@@ -80,17 +75,18 @@ GameMetaTable.__namecall = newcclosure(function(Self, ...)
 
 		return Self.FireServer(Self, unpack(Arguments))
 	elseif not checkcaller() and tostring(Self) == "CreateProjectile" and tostring(NameCallMethod) == "FireServer" then	
-		if _G.SilentAimEnabled == true then
+		if getgenv().SilentAimEnabled == true then
 			Arguments[18] = GetClosestPlayer().Character.Hitbox
 			Arguments[19] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[17] = GetClosestPlayer().Character.Hitbox.Position
 			Arguments[4] = GetClosestPlayer().Character.Hitbox.CFrame
-
-			Arguments[10] = GetClosestPlayer().Character.Hitbox.Position -- << >> << >> << >> << >>
+			Arguments[10] = GetClosestPlayer().Character.Hitbox.Position
+			Arguments[3] = GetClosestPlayer().Character.Hitbox.Position
 		end
 
 		return Self.FireServer(Self, unpack(Arguments))
 	elseif not checkcaller() and tostring(Self) == "Flames" and tostring(NameCallMethod) == "FireServer" then -- DOESNT WORK
-		if _G.SilentAimEnabled == true then
+		if getgenv().SilentAimEnabled == true then
 			Arguments[1] = GetClosestPlayer().Character.Hitbox.CFrame
 			Arguments[2] = GetClosestPlayer().Character.Hitbox.Position
 			Arguments[5] = GetClosestPlayer().Character.Hitbox.Position
@@ -98,27 +94,21 @@ GameMetaTable.__namecall = newcclosure(function(Self, ...)
 
 		return Self.FireServer(Self, unpack(Arguments))
 	elseif not checkcaller() and tostring(Self) == "Fire" and tostring(NameCallMethod) == "FireServer" then
-		if _G.SilentAimEnabled == true then
+		if getgenv().SilentAimEnabled == true then
 			Arguments[1] = GetClosestPlayer().Character.Hitbox.Position
 		end
 
 		return Self.FireServer(Self, unpack(Arguments))
 	elseif not checkcaller() and tostring(Self) == "ReplicateProjectile" and tostring(NameCallMethod) == "FireServer" then
-		if _G.SilentAimEnabled == true then
+		if getgenv().SilentAimEnabled == true then
 			Arguments[1][3] = GetClosestPlayer().Character.Hitbox.Position
 			Arguments[1][4] = GetClosestPlayer().Character.Hitbox.Position
 			Arguments[1][10] = GetClosestPlayer().Character.Hitbox.Position
-			Arguments[1][13][16] = GetClosestPlayer().Character.Head
-			Arguments[1][13][24] = GetClosestPlayer().Character.Head
-			Arguments[1][13][30] = GetClosestPlayer().Character.Head
-			Arguments[1][13][37] = GetClosestPlayer().Character.Head
-			Arguments[1][13][46] = GetClosestPlayer().Character.Head
-			Arguments[1][13][56] = GetClosestPlayer().Character.Head
 		end
 
 		return Self.FireServer(Self, unpack(Arguments))
 	elseif not checkcaller() and tostring(Self) == "RemoteEvent" and tostring(NameCallMethod) == "FireServer" then
-		if _G.SilentAimEnabled == true then
+		if getgenv().SilentAimEnabled == true then
 			if Arguments[1][1] == "createparticle" and Arguments[1][2] == "muzzle" then
 				if Arguments[3] == LocalPlayer.Character.Gun then
 					if ReplicatedStorage.Weapons(LocalPlayer.Character.Gun.Boop.Value).Melee then
@@ -155,7 +145,7 @@ GameMetaTable.__namecall = newcclosure(function(Self, ...)
 							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).EquipTime.Value,
 							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).RecoilControl.Value,
 							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value).Auto.Value,
-							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value)['Speed%'].Value,
+							ReplicatedStorage.Weapons:FindFirstChild(LocalPlayer.Character.EquippedTool.Value)["Speed%"].Value,
 							ReplicatedStorage:WaitForChild("wkspc").DistributedTime.Value,
 							215,
 							1,
@@ -175,5 +165,3 @@ GameMetaTable.__namecall = newcclosure(function(Self, ...)
 
 	return OldNameCall(Self, ...)
 end)
-
-setreadonly(GameMetaTable, true)
