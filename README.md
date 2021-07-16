@@ -8,7 +8,7 @@ Nothing much about this script. Whenever you shoot, the bullet hits the player t
 
 ## Script
 
-Load the script by using the code below or by copying it from [here](https://github.com/UbicastDev/Arsenal-Silent-Aim/blob/main/Arsenal%20Silent%20Aim.lua).
+Load the script by using the code below or by copying it from [here](https://github.com/Exunys/Arsenal-Silent-Aim/blob/main/Arsenal%20Silent%20Aim.lua).
 ```lua
 loadstring(game:HttpGet("https://pastebin.com/raw/NWMRbDL3"))()
 ```
